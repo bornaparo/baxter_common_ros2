@@ -25,6 +25,9 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+# Find control_msgs explicitly for ROS 2,, moje
+find_package(control_msgs REQUIRED) # Added
+
 # Service files
 rosidl_generate_interfaces(${PROJECT_NAME}
     "srv/Open.srv"
@@ -42,6 +45,7 @@ endif()
 find_package(OpenCV REQUIRED)
 
 # find ROS 1 packages we depend on
+# set(ROS1_LIBS roscpp rosconsole roscpp_serialization rostime xmlrpcpp rosconsole_glog)
 set(ROS1_LIBS roscpp rosconsole roscpp_serialization rostime xmlrpcpp)
 
 # if libraries in ROS1_ROOT, explicitely give their location
@@ -52,7 +56,7 @@ if(EXISTS ${ROS1_ROOT})
     endforeach()
 
     # install ROS 1 libs to have them at runtime
-    foreach(ROS1_LIB cpp_common rosconsole_backend_interface rosconsole_backend_interface rosconsole xmlrpcpp)
+    foreach(ROS1_LIB cpp_common rosconsole_backend_interface rosconsole_backend_interface rosconsole xmlrpcpp rosconsole_glog)
         install(FILES "${ROS1_ROOT}/lib/lib${ROS1_LIB}.so" DESTINATION lib)
     endforeach()
 
@@ -71,6 +75,8 @@ target_include_directories(bridge PRIVATE
                             ${ROS1_ROOT}/include
                             ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries(bridge ${ROS1_LIBS} ${OpenCV_LIBS})
+ament_target_dependencies(bridge control_msgs)
+
 if(${LEGACY_IDL})
     rosidl_target_interfaces(bridge ${PROJECT_NAME} "rosidl_typesupport_cpp")
 else()

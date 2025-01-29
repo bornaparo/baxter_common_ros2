@@ -13,8 +13,16 @@ struct Bridge_1to2 : public Bridge
   Bridge_1to2(const std::string &topic)
   {
     pub = ros2()->create_publisher<Msg2>(topic, 10);
+    // pub = ros2()->create_publisher<Msg2>(topic != "/robot/joint_states" ? topic : "/joint_states", 10); //zelim da mi se /robot/joint_states sa ros1 publisha na /joint_states na ros2 kako bi mi bilo kompatibilno sa ostatkom moveit koda
     sub = ros1()->subscribe<Msg1>(topic, 10, [&](const typename Msg1::ConstPtr &msg)
     {
+      // ////moj debug
+      // if (topic == "/robot/joint_states")
+      // {
+      //   std::cout << "[MOJE] ros1 got message on topic: " << topic << std::endl;
+      // }
+      // ////
+
       static Msg2 msg2;
       convert(*msg, msg2);
       pub->publish(msg2);

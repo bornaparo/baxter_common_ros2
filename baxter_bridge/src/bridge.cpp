@@ -8,12 +8,13 @@
 
 namespace baxter_bridge
 {
-  //std::unique_ptr<Monitor> Monitored::monitor;
+  //std::unique_ptr<Monitor> Monitored::monitor; //bilo zakomentirano
 
   std::tuple<bool,bool,bool> Bridge::init(int argc, char** argv)
   {
     // parse raw args to call the node easily from cmd line
-    auto on_baxter{true}, run_server{false};
+    auto on_baxter{true}, run_server{false}; //njihovo,, ako on_baxter nije true onda ti u baxter_bridge.cpp nece postojat poller i nece pollat topice
+    // auto on_baxter{false}, run_server{false}; //moje
     for(int idx = 0; idx < argc; ++idx)
     {
       const auto arg{std::string(argv[idx])};
@@ -27,13 +28,13 @@ namespace baxter_bridge
       // identify if we are actually on baxter
       try
       {
-        const std::string rosmaster{std::getenv("ROS_MASTER_URI")};
+        const std::string rosmaster = std::getenv("ROS_MASTER_URI") ? std::getenv("ROS_MASTER_URI") : "";
         on_baxter = rosmaster.find("baxter.local") != rosmaster.npos;
       }
       catch (...) {}
     }
 
-    const std::string name{std::getenv("USER")};
+    const std::string name = std::getenv("USER") ? std::getenv("USER") : "developer";
 
     // ros 1
     if(on_baxter)
@@ -41,6 +42,7 @@ namespace baxter_bridge
     else
       ros::init(argc, argv, "baxter_ros1_bridge");
     ros1_node = std::make_unique<ros::NodeHandle>();
+    std::cout << "[MOJE] Bridge::init(), ros1_node initialized" << std::endl;
 
     // ros 2
     rclcpp::init(argc, argv);
@@ -53,6 +55,7 @@ namespace baxter_bridge
 
     exec = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
     exec->add_node(ros2_node);
+    std::cout << "[MOJE] Bridge::init(), ros2_node initialized" << std::endl;
 
     if(use_baxter_description && !initRSP())
       return {false,false,false};

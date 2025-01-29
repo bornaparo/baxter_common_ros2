@@ -1074,7 +1074,7 @@ void convert(const geometry_msgs::AccelStamped &src, geometry_msgs::msg::AccelSt
   convert(src.accel, dst.accel);
 }
 
-std::map<std::string, std::string> Factory::topics_1to2 = {
+std::map<std::string, std::string> Factory::topics_1to2 = { //mapa (dict) topica koje publisha baxter gdje je key topic name a value topic type
   {"/cameras/head_camera/camera_info", "sensor_msgs/CameraInfo"},
   {"/cameras/head_camera/camera_info_std", "sensor_msgs/CameraInfo"},
   {"/cameras/head_camera/image", "sensor_msgs/Image"},
@@ -1216,7 +1216,12 @@ std::map<std::string, std::string> Factory::topics_1to2 = {
   {"/robustcontroller/right/rc_plugins_loaded", "std_msgs/Bool"},
   {"/update/progress", "std_msgs/Int32"},
   {"/update/status", "std_msgs/Int32"},
-  {"/usb/ready", "std_msgs/Bool"}};
+  {"/usb/ready", "std_msgs/Bool"},
+
+  //moje
+  {"/moj_1to2_debug_topic", "std_msgs/Bool"},
+  {"/joint_states", "sensor_msgs/JointState"},
+  };
 
 void Factory::createBridge_1to2(const std::string &topic, const std::string &msg)
 {

@@ -43,6 +43,12 @@
 #include <baxter_maintenance_msgs/TareEnable.h>
 #include <baxter_maintenance_msgs/msg/tare_enable.hpp>
 
+//moje
+#include <control_msgs/FollowJointTrajectoryActionGoal.h>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
+// #include <control_msgs/control_msgs/action/follow_joint_trajectory.hpp>
+// #include "/home/developer/ros2_ws/install/control_msgs/include/control_msgs/control_msgs/action/follow_joint_trajectory.hpp"
+
 namespace baxter_bridge
 {
 // converters
@@ -287,7 +293,67 @@ void convert(const baxter_maintenance_msgs::msg::TareEnable &src, baxter_mainten
   convert(src.data, dst.data);
 }
 
-std::map<std::string, std::string> Factory::topics_2to1 = {
+//moje
+template <>
+void convert(const control_msgs::action::FollowJointTrajectory::Goal &src, control_msgs::FollowJointTrajectoryGoal &dst)
+{
+  std::cout << "[MOJE] baxter_bridge convert(), converting ros2 FollowJointTrajectory::Goal to ros1 FollowJointTrajectoryGoal" << std::endl;
+
+  //sve sta convert radi je prebacuje stvari iz src u dst
+  //ne mozes samo dst = src; jer nisu isti data typeovi u ros1 i ros2 za sve,, mozes samo direktno kopirat iste data typeove, ako nisu onda moras ic duboko dole sve dok ne dodes do data type-a koji oboje imaju isti
+
+  dst.trajectory.joint_names = src.trajectory.joint_names;
+  dst.trajectory.points.clear();
+
+  for (const auto &src_point : src.trajectory.points)
+  {
+    trajectory_msgs::JointTrajectoryPoint dst_point;
+
+    dst_point.positions = src_point.positions;
+    dst_point.velocities = src_point.velocities;
+    dst_point.accelerations = src_point.accelerations;
+    dst_point.effort = src_point.effort;
+
+    // Convert time_from_start (ROS2 to ROS1)
+    dst_point.time_from_start = ros::Duration(src_point.time_from_start.sec, src_point.time_from_start.nanosec);
+
+    dst.trajectory.points.push_back(dst_point);
+
+  }
+
+  // Convert goal_time_tolerance
+  // If src.goal_time_tolerance is set, copy its value to dst
+  dst.goal_time_tolerance = ros::Duration(src.goal_time_tolerance.sec, src.goal_time_tolerance.nanosec);
+
+  dst.path_tolerance.clear();
+
+  for (const auto &src_path_tol : src.path_tolerance)
+  {
+    control_msgs::JointTolerance dst_path_tol;
+
+    dst_path_tol.name = src_path_tol.name;
+    dst_path_tol.position = src_path_tol.position;
+    dst_path_tol.velocity = src_path_tol.velocity;
+    dst_path_tol.acceleration = src_path_tol.acceleration;
+
+    dst.path_tolerance.push_back(dst_path_tol);
+  }
+
+  dst.goal_tolerance.clear(); // Clear any existing tolerances
+  for (const auto &src_goal_tol : src.goal_tolerance)
+  {
+    control_msgs::JointTolerance dst_goal_tol;
+
+    dst_goal_tol.name = src_goal_tol.name;
+    dst_goal_tol.position = src_goal_tol.position;
+    dst_goal_tol.velocity = src_goal_tol.velocity;
+    dst_goal_tol.acceleration = src_goal_tol.acceleration;
+
+    dst.goal_tolerance.push_back(dst_goal_tol);
+  }
+}
+
+std::map<std::string, std::string> Factory::topics_2to1 = { //mapa topica na koje se subscribe-a baxter,, key je topic name a value je topic type
   {"/robot/analog_io/command", "baxter_core_msgs/AnalogOutputCommand"},
   {"/robot/digital_io/command", "baxter_core_msgs/DigitalOutputCommand"},
   {"/robot/end_effector/left_gripper/command", "baxter_core_msgs/EndEffectorCommand"},
@@ -339,12 +405,18 @@ std::map<std::string, std::string> Factory::topics_2to1 = {
   {"/robustcontroller/left/CalibrateArm/enable", "baxter_maintenance_msgs/CalibrateArmEnable"},
   {"/robustcontroller/left/Tare/enable", "baxter_maintenance_msgs/TareEnable"},
   {"/robustcontroller/right/CalibrateArm/enable", "baxter_maintenance_msgs/CalibrateArmEnable"},
-  {"/robustcontroller/right/Tare/enable", "baxter_maintenance_msgs/TareEnable"}};
+  {"/robustcontroller/right/Tare/enable", "baxter_maintenance_msgs/TareEnable"},
+
+  //moje
+  {"/robot/limb/left/follow_joint_trajectory_bridge", "control_msgs/FollowJointTrajectoryGoal"},
+  {"/robot/limb/right/follow_joint_trajectory_bridge", "control_msgs/FollowJointTrajectoryGoal"},
+  {"/moj_2to1_debug_topic", "std_msgs/Bool"}, //moj debug topic koji sluzi samo da vidim jel dobro radi 2->1 forwardanje
+  };
 
 void Factory::createBridge_2to1(const std::string &topic, const std::string &msg)
 {
   if(msg == "sensor_msgs/JointState")
-    bridges.push_back(std::make_unique<Bridge_2to1<sensor_msgs::JointState, sensor_msgs::msg::JointState>>(topic));
+    bridges.push_back(std::make_unique<Bridge_2to1<sensor_msgs::JointState, sensor_msgs::msg::JointState>>(topic)); //ros2 se subscribea na topic sa msg2 typeom (sensor_msgs::msg::JointState) i kad primi msg onda to publisha na ros1 topic sa msg1 typeom (sensor_msgs::JointState)
   else if(msg == "geometry_msgs/PoseStamped")
     bridges.push_back(std::make_unique<Bridge_2to1<geometry_msgs::PoseStamped, geometry_msgs::msg::PoseStamped>>(topic));
   else if(msg == "baxter_core_msgs/AnalogOutputCommand")
@@ -382,6 +454,12 @@ void Factory::createBridge_2to1(const std::string &topic, const std::string &msg
   else if(msg == "baxter_maintenance_msgs/CalibrateArmEnable")
     bridges.push_back(std::make_unique<Bridge_2to1<baxter_maintenance_msgs::CalibrateArmEnable, baxter_maintenance_msgs::msg::CalibrateArmEnable>>(topic));
   else if(msg == "baxter_maintenance_msgs/TareEnable")
-    bridges.push_back(std::make_unique<Bridge_2to1<baxter_maintenance_msgs::TareEnable, baxter_maintenance_msgs::msg::TareEnable>>(topic));
+    bridges.push_back(std::make_unique<Bridge_2to1<baxter_maintenance_msgs::TareEnable, baxter_maintenance_msgs::msg::TareEnable>>(topic)); //ros2 se subscribea na topic sa msg2 typeom i kad primi msg onda to publisha na ros1 topic sa msg1 typeom
+  //moje
+  else if(msg == "control_msgs/FollowJointTrajectoryGoal")
+  {
+    std::cout << "[MOJE] Factory::createBridge_2to1(), bridge for topic: " << topic << std::endl;
+    bridges.push_back(std::make_unique<Bridge_2to1<control_msgs::FollowJointTrajectoryGoal, control_msgs::action::FollowJointTrajectory::Goal>>(topic));
+  }
 }
 }

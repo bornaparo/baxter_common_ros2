@@ -37,7 +37,7 @@ bool Factory::createBridge(const std::string &topic, const std::string &msg)
   // known Baxter topics are checked first
   if(const auto bridge = topics_1to2.find(topic);bridge != topics_1to2.end())
   {
-    const auto msg{bridge->second};
+    const auto msg{bridge->second}; //msg type
     topics_1to2.erase(bridge);
     RCLCPP_INFO(Bridge::ros2()->get_logger(), "Creating bridge 1->2 %s", topic.c_str());
     createBridge_1to2(topic, msg);
@@ -55,9 +55,11 @@ bool Factory::createBridge(const std::string &topic, const std::string &msg)
 
   // we might open any bridge as long as it does not exist yet
   if(const auto bridge = std::find_if(bridges.begin(), bridges.end(),
-                                      [&](auto &bridge){return bridge->topic() == topic;});
-     bridge != bridges.end())
-    return false;
+  [&](auto &bridge){return bridge->topic() == topic;}); bridge != bridges.end())
+    {
+      std::cout << "[MOJE] Factory::createBridge(), bridge already exists for topic `" << topic << "`, not creating it again. Returning..." << std::endl;
+      return false;
+    }
 
   const auto prev_bridges_count{bridges.size()};
   createBridge_1to2(topic, msg);

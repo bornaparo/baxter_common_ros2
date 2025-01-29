@@ -20,11 +20,11 @@ public:
 
   inline static bool isSubscribedByBaxter(const std::string &topic)
   {
-    return topics_2to1.find(topic) != topics_2to1.end();
+    return topics_2to1.find(topic) != topics_2to1.end(); //gleda ako se baxter subscribea na taj topic i ako nije vec bridge-an (ako je onda je izbrisan iz topics_2to1 i onda ovaj find bude .end i vrati se false)
   }
   inline static bool isPublishedByBaxter(const std::string &topic)
   {
-    return topics_1to2.find(topic) != topics_1to2.end();
+    return topics_1to2.find(topic) != topics_1to2.end(); //gleda ako baxter publisha na taj topic i ako nije vec bridge-an (ako je onda je izbrisan iz topics_1to2 i onda ovaj find bude .end i vrati se false)
   }
 
   static std::optional<Bridge::Direction> exists(const std::string &topic);

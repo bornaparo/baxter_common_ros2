@@ -1,6 +1,7 @@
 #include <baxter_bridge/solve_ik.h>
 #include <baxter_bridge/bridge_1to2.h>
 #include <baxter_bridge/topic_poller.h>
+#include <rclcpp/logging.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <baxter_bridge/srv/exists.hpp>
 #include <baxter_bridge/srv/open.hpp>
@@ -25,10 +26,24 @@ int main(int argc, char** argv)
     Factory::createBridge("/robot/sonar/head_sonar/state");
     Factory::createBridge("/robot/joint_states");
 
+    //moje
+    Factory::createBridge("/robot/limb/left/follow_joint_trajectory_bridge"); //moje za slanje action goal poruke sa ros2 na ros1
+    Factory::createBridge("/robot/limb/right/follow_joint_trajectory_bridge"); //moje za slanje action goal poruke sa ros2 na ros1
+    Factory::createBridge("/moj_2to1_debug_topic"); //moje za debug
+    Factory::createBridge("/moj_1to2_debug_topic"); //moje za debug
+    Factory::createBridge("/joint_states"); //moje da bi mi mogli rviz, moveit itd koristit joint_states od pravog baxtera
+
+
     if(is_static)
+    {
+      RCLCPP_INFO(Bridge::ros2()->get_logger(), "[MOJE] main(), bridge is static, creating remaining bridges");
       Factory::createRemainingBridges();
+    }
     else
+    {
       poller = std::make_unique<TopicPoller>(Bridge::ros2());
+      RCLCPP_INFO(Bridge::ros2()->get_logger(), "[MOJE] main(), poller created");
+    }
   }
   else
   {
@@ -36,7 +51,7 @@ int main(int argc, char** argv)
   }
 
   // basic command and inverse kinematics for both arms
-  SolveIK left("left"), right("right");
+  SolveIK left("left"), right("right"); //kreiraju /robot/limb/left/joint_command i /robot/limb/right/joint_command bridge-eve
 
   // service to spawn a topic on demand
   auto open_srv = Bridge::ros2()->create_service<Open>("bridge_open",
@@ -68,7 +83,18 @@ int main(int argc, char** argv)
     if(poller)
     {
       for(const auto &topic: poller->pendingBridges())
-        Factory::createBridge(topic);
+      {
+        RCLCPP_INFO(Bridge::ros2()->get_logger(), "  [MOJE] main(), creating bridge for topic %s", topic.c_str());
+        bool result = Factory::createBridge(topic);
+        if(result)
+        {
+         RCLCPP_INFO(Bridge::ros2()->get_logger(), "  [MOJE] main(), bridge for topic %s successfully created", topic.c_str()); 
+        }
+        else
+        {
+          RCLCPP_ERROR(Bridge::ros2()->get_logger(), "  [MOJE] main(), bridge for topic %s wasn't created successfully", topic.c_str());
+        }
+      }
     }
   }
 
