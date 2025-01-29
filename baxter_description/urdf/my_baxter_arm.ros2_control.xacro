@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="baxter_arm_ros2_control" params="side"> side je left ili right
+        <ros2_control name="${side}_baxter_arm" type="system">
+            <hardware>
+                <xacro:if value="${gazebo}"> gazebo==1, koristi gazebo,, gazebo je property definiran u baxter2_include.urdf.xacro, njega definira arg u tom istom fileu a arg se zadaje preko launch file preko mappingsa
+                    <plugin>ign_ros2_control/IgnitionSystem</plugin>
+                </xacro:if>
+                <xacro:unless value="${gazebo}"> gazebo==0, ne koristi gazebo,, gazebo je property definiran u baxter2_include.urdf.xacro, njega definira arg u tom istom fileu a arg se zadaje preko launch file preko mappingsa
+                    <plugin>mock_components/GenericSystem</plugin> za sad bez gazeba
+                </xacro:unless>
+            </hardware>
+            right_s0
+            <joint name="${side}_s0">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_s1
+            <joint name="${side}_s1">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_e0
+            <joint name="${side}_e0">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_e1
+            <joint name="${side}_e1">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_w0
+            <joint name="${side}_w0">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_w1
+            <joint name="${side}_w1">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_w2
+            <joint name="${side}_w2">
+                <command_interface name="position"/>
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            head_pan, ne treba za upravljanje ali inace ti nece bit spojeni u tf treeju jer ga nece publishat joint_state_broadcaster jer mu nisi tu zadao da ga publisha (a nije fixed joint (vec je revolute))
+            <joint name="head_pan">
+                <command_interface name="position"/> nije ni potreban command_interface jer ovim jointom neces ni upravljat,, al pusti mozda poslije hoces
+                <!-- <command_interface name="velocity"/> -->
+                <state_interface name="position">
+                    <param name="initial_value">0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+</robot>

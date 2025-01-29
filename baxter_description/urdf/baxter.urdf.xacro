@@ -28,6 +28,16 @@
   <xacro:include filename="$(find baxter_description)/urdf/gazebosim.urdf.xacro" />
 
 
+  <!-- Moje, ros2_control -->
+  <xacro:include filename="$(find baxter_description)/urdf/my_baxter_arm.ros2_control.xacro" />
+  <xacro:include filename="$(find baxter_description)/urdf/my_baxter_hand.ros2_control.xacro" />
+  
+  <xacro:baxter_arm_ros2_control side="right"/>
+  <xacro:baxter_arm_ros2_control side="left"/>
+
+  <xacro:baxter_hand_ros2_control side="right"/>
+  <xacro:baxter_hand_ros2_control side="left"/>
+
 
 
 </robot>

@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<robot name="gazebo_plugin" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <gazebo>
+        <plugin name='ign_ros2_control::IgnitionROS2ControlPlugin' filename='ign_ros2_control-system'> 
+            <parameters>$(find baxter_moveit_config)/config/ros2_controllers.yaml</parameters>
+        </plugin>
+    </gazebo>
+
+    <link name="world"/> i s ovim i dalje oscilira, mozda cak i duze
+    <joint name="world_virtual_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base"/>
+        <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+        <!-- <origin xyz="0 -0.9 0" rpy="0 0 0"/> -->
+        <origin xyz="0 0 0.9" rpy="0 0 0"/> world to base tf, da bi dosao od worlda do base trebas ic za 0.9 po world z osi,,, nez zas nije radilo kako treba sa static transformom,,, njemu je base kao u sredini trupa a ne dno, pa ovako napravim da mi je na dnu world
+    </joint> 
+
+     <!-- da supressa error od move group-a (https://github.com/ros-controls/gazebo_ros2_control/issues/173) koji ne sluzi nicemu, tj gazebo apenda taj sufix i onda baca error, ovo samo napravi bezveze joint koji ne sluzi nicemu nego je tu da move_group misli da postoji i da ne baca error,, radi i sa bez ovog samo s ovim ne baca error -->
+    <link name="random1"/>
+    <joint name="l_gripper_r_finger_joint_mimic" type="fixed">
+        <parent link="world" />
+        <child link="random1" />
+    </joint>
+    <link name="random2"/>
+    <joint name="r_gripper_r_finger_joint_mimic" type="fixed">
+        <parent link="world" />
+        <child link="random2" />
+    </joint>
+</robot>

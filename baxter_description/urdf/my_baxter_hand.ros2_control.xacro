@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="baxter_hand_ros2_control" params="side"> side je left ili right
+        <ros2_control name="${side}_baxter_hand" type="system">
+            <hardware>
+                <xacro:if value="${gazebo}"> gazebo==1, koristi gazebo,, gazebo je property definiran u baxter2_include.urdf.xacro, njega definira arg u tom istom fileu a arg se zadaje preko launch file preko mappingsa
+                    <plugin>ign_ros2_control/IgnitionSystem</plugin>
+                </xacro:if>
+                <xacro:unless value="${gazebo}"> gazebo==0, ne koristi gazebo,, gazebo je property definiran u baxter2_include.urdf.xacro, njega definira arg u tom istom fileu a arg se zadaje preko launch file preko mappingsa
+                    <plugin>mock_components/GenericSystem</plugin> za sad bez gazeba
+                </xacro:unless>
+            </hardware>
+            right_gripper_base
+            <!-- <joint name="${side}_gripper_base"> -->
+            <joint name="${side}_gripper_base_jnt">
+                <command_interface name="position" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - right_endpoint
+            <joint name="${side}_endpoint">
+                <command_interface name="position" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - r_gripper_l_finger_joint
+            <joint name="${side[0]}_gripper_l_finger_joint">
+                <command_interface name="position" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+            - r_gripper_r_finger_joint,, msm da nije ni potreban jer je ionako mimic joint,,, radi i ako ne stavis da je mimic
+            <joint name="${side[0]}_gripper_r_finger_joint">
+                <param name="mimic">${side[0]}_gripper_l_finger_joint</param>
+                <param name="multiplier">-1</param> ako l ide na 0.028033 ovaj mora na -0.028033, vidis da je multiplier -1 iz urdfa, u ovom je bio glavni problem za otvaranje/zatvaranje ruke preko srdf-a group_state name-a
+                <command_interface name="position" />
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+            </joint>
+        </ros2_control>
+    </xacro:macro>
+</robot>

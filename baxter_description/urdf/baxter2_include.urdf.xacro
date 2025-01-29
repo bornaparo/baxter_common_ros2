@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<robot name="baxter" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- cijeli baxter (base, pedestal, gripperi, ...) iz ros1 urdf -->
+  <xacro:include filename="$(find baxter_description)/urdf/baxter2.urdf.xacro" />
+
+  <!-- Moje, gazebo plugin -->
+  <xacro:include filename="$(find baxter_description)/urdf/my_gazebo.urdf.xacro" />
+
+
+  <!-- Moje, ros2_control -->
+  <xacro:arg name="gazebo" default="0"/> default da ne koristi gazebo, 1 je da koristi, ovo ces mu dat iz launch filea preko mappings-a kod procesiranja xacroa
+  <xacro:property name="gazebo" value="$(arg gazebo)"/>
+
+  <xacro:include filename="$(find baxter_description)/urdf/my_baxter_arm.ros2_control.xacro" />
+  <xacro:include filename="$(find baxter_description)/urdf/my_baxter_hand.ros2_control.xacro" />
+  
+  <xacro:baxter_arm_ros2_control side="right"/>
+  <xacro:baxter_arm_ros2_control side="left"/>
+
+  <xacro:baxter_hand_ros2_control side="right"/>
+  <xacro:baxter_hand_ros2_control side="left"/>
+
+</robot>
