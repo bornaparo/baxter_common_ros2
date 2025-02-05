@@ -49,3 +49,5 @@ test_results
 CMakeLists.txt.user
 
 .cache
+
+.vscode
